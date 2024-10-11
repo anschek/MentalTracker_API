@@ -1,3 +1,6 @@
+using MentalTracker_API.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace MentalTracker_API
 {
     public class Program
@@ -8,6 +11,8 @@ namespace MentalTracker_API
 
             // Add services to the container.
             builder.Services.AddControllers();
+            builder.Services.AddDbContext<MentalTrackerContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             var app = builder.Build();
