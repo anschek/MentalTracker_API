@@ -1,5 +1,4 @@
 ﻿using MentalTracker_API.Models;
-using MentalTracker_API.Models.DataTransferObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -16,7 +15,7 @@ namespace MentalTracker_API.Controllers
         {
             _context = context;
         }
-        private string GetPasswordHash( string password)
+        private string GetPasswordHash(string password)
         {
             using (SHA512 sha512 = SHA512.Create())
             {
@@ -31,10 +30,10 @@ namespace MentalTracker_API.Controllers
             try
             {
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(user => user.Mail == mail 
+                    .FirstOrDefaultAsync(user => user.Mail == mail
                     && user.Password == GetPasswordHash(password));
-        
-                if(user == null) return NotFound();
+
+                if (user == null) return NotFound();
                 return user;
             }
             catch
@@ -43,42 +42,55 @@ namespace MentalTracker_API.Controllers
             }
         }
         [HttpPost]
-        public async Task<ActionResult<User>> CreateNewUser(UserDto userDto)
+        public async Task<ActionResult<User>> CreateNewUser(User user)
         {
             try
             {
-                userDto.Password = GetPasswordHash(userDto.Password);
-                User user = new User(userDto);
+                user.Password = GetPasswordHash(user.Password);
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
-                return _context.Users.First(user => user.Mail==userDto.Mail);
+                return _context.Users.First(user => user.Mail == user.Mail);
             }
             catch
             {
                 return BadRequest();
             }
         }
+
         [HttpPut("change-personal-data")]
-        public async Task<IActionResult> UpdateUserData(User user)
+        public async Task<IActionResult> UpdateUserData(User updatedUser)
         {
             try
             {
-                _context.Entry(user).State = EntityState.Modified;
+                User? existingUser = await _context.Users.FindAsync(updatedUser.Id);
+                if (existingUser == null) return NotFound("User not found.");
+                
+                existingUser.Name = updatedUser.Name;
+                existingUser.Mail = updatedUser.Mail;
+                existingUser.DateOfBirth = updatedUser.DateOfBirth;
+
+                _context.Entry(updatedUser).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return Ok();
             }
-            catch 
+            catch
             {
-                return BadRequest();            
+                return BadRequest();
             }
         }
+
         [HttpPut("change-password")]
-        public async Task<IActionResult> UpdateUserPassword(User user, string newPassword)
+        public async Task<IActionResult> UpdateUserPassword(Guid updatedUserId, string oldPassword, string newPassword)
         {
             try
             {
-                user.Password = GetPasswordHash(user.Password);
-                _context.Entry(user).State = EntityState.Modified;
+                User? existingUser = await _context.Users.FindAsync(updatedUserId);
+                if (existingUser == null) return NotFound("User not found.");
+
+                if(existingUser.Password !=  GetPasswordHash(oldPassword)) return BadRequest("Wrong old password");
+
+                existingUser.Password = GetPasswordHash(newPassword);
+                _context.Entry(existingUser).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return Ok();
             }
@@ -89,3 +101,5 @@ namespace MentalTracker_API.Controllers
         }
     }
 }
+
+
