@@ -12,7 +12,6 @@ namespace MentalTracker_API.Models
 
         public int Id { get; set; }
         public string Name { get; set; } = null!;
-
         public virtual ICollection<Mood> Moods { get; set; }
     }
 }
