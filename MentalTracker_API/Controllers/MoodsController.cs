@@ -17,34 +17,19 @@ namespace MentalTracker_API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MoodBasis>>> GetMoodsWithBases()
         {
-            try
-            {
-                var moodBases = await _context.MoodBases.Include(moodBase => moodBase.Moods).ToListAsync();
-                if (moodBases == null || moodBases.Count == 0) return NotFound();
-                return moodBases;
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            var moodBases = await _context.MoodBases.Include(moodBase => moodBase.Moods).ToListAsync();
+            if (moodBases == null || moodBases.Count == 0) return NotFound();
+            return moodBases;
         }
         [HttpPost]
         public async Task<IActionResult> CreateNewMood([FromQuery] int moodBaseId, [FromQuery] string newMoodName)
         {
-            try
-            {
-                var moodBase = await _context.MoodBases.FirstOrDefaultAsync(moodBase => moodBase.Id == moodBaseId);
-                if (moodBase == null) return NotFound($"Mood base with id = {moodBaseId} not found");
-                var newMood = new Mood { Id = 0, Name = newMoodName, MoodBaseId = moodBaseId };
-                await _context.Moods.AddAsync(newMood);
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            catch
-            {
-                return BadRequest();
-            }
-
+            var moodBase = await _context.MoodBases.FirstOrDefaultAsync(moodBase => moodBase.Id == moodBaseId);
+            if (moodBase == null) return NotFound($"Mood base with id = {moodBaseId} not found");
+            var newMood = new Mood { Id = 0, Name = newMoodName, MoodBaseId = moodBaseId };
+            await _context.Moods.AddAsync(newMood);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
     }
 }

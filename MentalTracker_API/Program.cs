@@ -12,8 +12,11 @@ namespace MentalTracker_API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers()
-                .AddJsonOptions(options =>
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add<ApiExceptionFilter>();
+            }
+            ).AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
                     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
