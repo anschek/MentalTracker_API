@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MentalTracker_API.Models
 {
@@ -11,11 +12,13 @@ namespace MentalTracker_API.Models
         }
 
         public int Id { get; set; }
+        [JsonIgnore]
         public int? MetricTypeId { get; set; }
         public string Name { get; set; } = null!;
         public bool IsPositive { get; set; }
-
+        [JsonIgnore]
         public virtual MetricType? MetricType { get; set; }
+        [JsonIgnore]
         public virtual ICollection<MetricInDailyState> MetricInDailyStates { get; set; }
     }
 }
