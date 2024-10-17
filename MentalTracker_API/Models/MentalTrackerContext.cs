@@ -26,7 +26,6 @@ namespace MentalTracker_API.Models
         public virtual DbSet<Mood> Moods { get; set; } = null!;
         public virtual DbSet<MoodBasis> MoodBases { get; set; } = null!;
         public virtual DbSet<TagMetricMatch> TagMetricMatches { get; set; } = null!;
-        public virtual DbSet<TagMoodMatch> TagMoodMatches { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -103,6 +102,23 @@ namespace MentalTracker_API.Models
                 entity.Property(e => e.Name)
                     .HasMaxLength(30)
                     .HasColumnName("name");
+
+                entity.HasMany(d => d.Moods)
+                    .WithMany(p => p.Tags)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "TagMoodMatch",
+                        l => l.HasOne<Mood>().WithMany().HasForeignKey("MoodId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("tag_mood_matches_mood_id_fkey"),
+                        r => r.HasOne<ArticleTag>().WithMany().HasForeignKey("TagId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("tag_mood_matches_tag_id_fkey"),
+                        j =>
+                        {
+                            j.HasKey("TagId", "MoodId").HasName("tag_mood_matches_pkey");
+
+                            j.ToTable("tag_mood_matches");
+
+                            j.IndexerProperty<int>("TagId").HasColumnName("tag_id");
+
+                            j.IndexerProperty<int>("MoodId").HasColumnName("mood_id");
+                        });
             });
 
             modelBuilder.Entity<ArticleType>(entity =>
@@ -244,52 +260,30 @@ namespace MentalTracker_API.Models
 
             modelBuilder.Entity<TagMetricMatch>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => new { e.TagId, e.MetricId })
+                    .HasName("tag_metric_matches_pkey");
 
                 entity.ToTable("tag_metric_matches");
 
-                entity.Property(e => e.EndingWith).HasColumnName("ending_with");
+                entity.Property(e => e.TagId).HasColumnName("tag_id");
 
                 entity.Property(e => e.MetricId).HasColumnName("metric_id");
 
+                entity.Property(e => e.EndingWith).HasColumnName("ending_with");
+
                 entity.Property(e => e.StartingWith).HasColumnName("starting_with");
 
-                entity.Property(e => e.TagId).HasColumnName("tag_id");
-
                 entity.HasOne(d => d.Metric)
-                    .WithMany()
+                    .WithMany(p => p.TagMetricMatches)
                     .HasForeignKey(d => d.MetricId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("tag_metric_matches_metric_id_fkey");
 
                 entity.HasOne(d => d.Tag)
-                    .WithMany()
+                    .WithMany(p => p.TagMetricMatches)
                     .HasForeignKey(d => d.TagId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("tag_metric_matches_tag_id_fkey");
-            });
-
-            modelBuilder.Entity<TagMoodMatch>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("tag_mood_matches");
-
-                entity.Property(e => e.MoodId).HasColumnName("mood_id");
-
-                entity.Property(e => e.TagId).HasColumnName("tag_id");
-
-                entity.HasOne(d => d.Mood)
-                    .WithMany()
-                    .HasForeignKey(d => d.MoodId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("tag_mood_matches_mood_id_fkey");
-
-                entity.HasOne(d => d.Tag)
-                    .WithMany()
-                    .HasForeignKey(d => d.TagId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("tag_mood_matches_tag_id_fkey");
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -297,6 +291,9 @@ namespace MentalTracker_API.Models
                 entity.ToTable("users");
 
                 entity.HasIndex(e => e.Mail, "users_mail_key")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Mail, "users_mail_unique")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -314,7 +311,7 @@ namespace MentalTracker_API.Models
                     .HasColumnName("name");
 
                 entity.Property(e => e.Password)
-                    .HasMaxLength(30)
+                    .HasMaxLength(255)
                     .HasColumnName("password");
             });
 

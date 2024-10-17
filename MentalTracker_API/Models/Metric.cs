@@ -9,6 +9,7 @@ namespace MentalTracker_API.Models
         public Metric()
         {
             MetricInDailyStates = new HashSet<MetricInDailyState>();
+            TagMetricMatches = new HashSet<TagMetricMatch>();
         }
 
         public int Id { get; set; }
@@ -20,5 +21,6 @@ namespace MentalTracker_API.Models
         public virtual MetricType? MetricType { get; set; }
         [JsonIgnore]
         public virtual ICollection<MetricInDailyState> MetricInDailyStates { get; set; }
+        public virtual ICollection<TagMetricMatch> TagMetricMatches { get; set; }
     }
 }
