@@ -1,4 +1,5 @@
 ﻿using MentalTracker_API.Models;
+using MentalTracker_API.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,44 +22,47 @@ namespace MentalTracker_API.Controllers
             if (user == null) return NotFound($"User with id={userId} nor found");
 
             var dailyState = await _context.DailyStates.Include(state => state.MetricInDailyStates)
-                .FirstOrDefaultAsync(state => state.NoteDate == dateOfState);
+                .FirstOrDefaultAsync(state => state.User==user && state.NoteDate == dateOfState);
             if (dailyState == null) return NotFound($"State on date: {dateOfState} not found");
 
             return dailyState;
         }
 
-        public class Period
-        {
-            public DateOnly? Beginning { get; set; }
-            public DateOnly? End { get; set; }
-        }
-
         [HttpGet("{userId}")]
-        public async Task<ActionResult<ICollection<DailyState>>> GetUserDailyStates(Guid userId, Period? period)
+        public async Task<ActionResult<ICollection<DailyState>>> GetUserDailyStates(Guid userId, [FromHeader] Period? period)
         {
             var user = await _context.Users.FindAsync(userId);
-            if (user == null) return NotFound($"User with id={userId} nor found");
+            if (user == null) return NotFound($"User with id={userId} not found");
 
             period              ??= new Period();
             period.Beginning    ??= DateOnly.MinValue;
             period.End          ??= DateOnly.MaxValue;
             if (period.End < period.Beginning) return BadRequest("Start date of period must be lass than end date of period");
 
-            var states = await _context.DailyStates.Include(state => state.MetricInDailyStates)
-                .Where(state => state.NoteDate >= period.Beginning && state.NoteDate <= period.End).ToListAsync();
+            var states = await _context.DailyStates
+                .Include(state => state.Mood)
+                .Include(state => state.MetricInDailyStates)
+                .ThenInclude(dailyMetric => dailyMetric.Metric.MetricType)
+                .Where(state => state.User == user && state.NoteDate >= period.Beginning && state.NoteDate <= period.End).ToListAsync();
 
             if (states == null || states.Count == 0) return NotFound();
 
             return states;
         }
 
-        //TODO
-        //[HttpGet("{userId}/short")]
-        //public async Task<ActionResult<ICollection<ShortDailyState>>> GetUserDailyStatesShort(Guid userId, DateOnly beginning, DateOnly end)
-        //{
-
-
-        //}
+        
+        [HttpGet("{userId}/short")]
+        public async Task<ActionResult<ICollection<ShortDailyState>>> GetUserDailyStatesShort(Guid userId, [FromHeader] Period? period)
+        {
+            var result = await GetUserDailyStates(userId, period);
+            if(result.Result != null)
+            {            
+                if (result.Result is NotFoundResult) return NotFound(result.Value);
+                return BadRequest(result.Value);
+            }
+            var shortStates = result.Value.Select(dailyState => new ShortDailyState(dailyState)).ToList();
+            return shortStates;
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateNewUserDailyState(DailyState dailyState)
