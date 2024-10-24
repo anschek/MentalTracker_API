@@ -13,7 +13,9 @@ namespace MentalTracker_API.Controllers
         {
             _context = context;
         }
-
+        /// <summary>
+        /// Getting metrics within their types
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ICollection<MetricType>>> GetMetricsWithTypes()
         {
@@ -21,7 +23,12 @@ namespace MentalTracker_API.Controllers
             if(metricTypes == null || metricTypes.Count == 0) return NotFound();
             return metricTypes;
         }
-
+        /// <summary>
+        /// Creating a new metric
+        /// </summary>
+        /// <param name="metricTypeId"> Metric type (usually mental(1) or physical(2)) </param>
+        /// <param name="newMetricName"> Metric itself </param>
+        /// <param name="newMetricIsPositive"> New metric is positive - true, negative - false</param>
         [HttpPost]
         public async Task<IActionResult> CreateNewMetric([FromQuery] int metricTypeId, [FromQuery] string newMetricName, [FromQuery] bool newMetricIsPositive)
         {

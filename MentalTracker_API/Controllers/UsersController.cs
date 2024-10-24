@@ -24,6 +24,9 @@ namespace MentalTracker_API.Controllers
                 return string.Join(" ", hashedBytes);
             }
         }
+        /// <summary>
+        /// Getting user object by mail and password
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<User>> GetUser(string mail, string password)
         {
@@ -34,6 +37,11 @@ namespace MentalTracker_API.Controllers
             if (user == null) return NotFound();
             return user;
         }
+        /// <summary>
+        /// Creating a new user
+        /// </summary>
+        /// <param name="user">Includes: mail, password, date of birth, name </param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<User>> CreateNewUser(User user)
         {
@@ -42,7 +50,9 @@ namespace MentalTracker_API.Controllers
             await _context.SaveChangesAsync();
             return _context.Users.First(user => user.Mail == user.Mail);
         }
-
+        /// <summary>
+        /// User data update
+        /// </summary>
         [HttpPut("change-personal-data")]
         public async Task<IActionResult> UpdateUserData(User updatedUser)
         {
@@ -57,7 +67,9 @@ namespace MentalTracker_API.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
+        /// <summary>
+        /// User password update
+        /// </summary>
         [HttpPut("change-password")]
         public async Task<IActionResult> UpdateUserPassword(Guid updatedUserId, string oldPassword, string newPassword)
         {

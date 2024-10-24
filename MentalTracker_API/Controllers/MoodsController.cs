@@ -13,7 +13,9 @@ namespace MentalTracker_API.Controllers
         {
             _context = context;
         }
-
+        /// <summary>
+        /// Getting moods within their bases(types)
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MoodBasis>>> GetMoodsWithBases()
         {
@@ -21,6 +23,12 @@ namespace MentalTracker_API.Controllers
             if (moodBases == null || moodBases.Count == 0) return NotFound();
             return moodBases;
         }
+        /// <summary>
+        /// Creating a new moods
+        /// </summary>
+        /// <param name="moodBaseId"> Mood base (type) </param>
+        /// <param name="newMoodName"> Mood itself </param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateNewMood([FromQuery] int moodBaseId, [FromQuery] string newMoodName)
         {
