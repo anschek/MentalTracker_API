@@ -14,7 +14,9 @@ namespace MentalTracker_API.Controllers
         {
             _context = context;
         }
-
+        /// <summary>
+        /// Getting full daily state with mood, note and metrics with assessments
+        /// </summary>
         [HttpGet("{userId}/{date}")]
         public async Task<ActionResult<DailyState>> GetUserDailyState(Guid userId, DateOnly dateOfState)
         {
@@ -27,7 +29,13 @@ namespace MentalTracker_API.Controllers
 
             return dailyState;
         }
-
+        /// <summary>
+        ///  Getting full daily states for period.
+        ///  The states are returned:
+        ///  if period is null - all,
+        ///  if lower limit is null - all states up to Period.End
+        ///  if upper limit is null - all states from date Period.Beginning
+        /// </summary>
         [HttpGet("{userId}")]
         public async Task<ActionResult<ICollection<DailyState>>> GetUserDailyStates(Guid userId, [FromHeader] Period? period)
         {
@@ -49,8 +57,9 @@ namespace MentalTracker_API.Controllers
 
             return states;
         }
-
-        
+        /// <summary>
+        /// same as api/DailyStates, but returns short format states
+        /// </summary>
         [HttpGet("{userId}/short")]
         public async Task<ActionResult<ICollection<ShortDailyState>>> GetUserDailyStatesShort(Guid userId, [FromHeader] Period? period)
         {
@@ -63,7 +72,10 @@ namespace MentalTracker_API.Controllers
             var shortStates = result.Value.Select(dailyState => new ShortDailyState(dailyState)).ToList();
             return shortStates;
         }
-
+        /// <summary>
+        /// Saving user's state for day
+        /// </summary>
+        /// <param name="dailyState">Should include: user id, mood, note date, metrics with assessments</param>
         [HttpPost]
         public async Task<IActionResult> CreateNewUserDailyState(DailyState dailyState)
         {
@@ -84,7 +96,10 @@ namespace MentalTracker_API.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
+        /// <summary>
+        /// Update user's state for day
+        /// </summary>
+        /// <param name="dailyState">id must be equal to original id, state body is changed by it</param>
         [HttpPut]
         public async Task<IActionResult> UpdateUserDailyState(DailyState dailyState)
         {
@@ -98,7 +113,9 @@ namespace MentalTracker_API.Controllers
 
             return Ok();
         }
-
+        /// <summary>
+        /// Deleting daily state by its Id
+        /// </summary>
         [HttpDelete("dailyStateId")]
         public async Task<IActionResult> DeleteUserDailyState(int dailyStateId)
         {

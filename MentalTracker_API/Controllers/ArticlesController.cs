@@ -4,8 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MentalTracker_API.Controllers
 {
+    /// <summary>
+    /// описание контроллера
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class ArticlesController : Controller
     {
         private readonly MentalTrackerContext _context;
@@ -13,7 +17,9 @@ namespace MentalTracker_API.Controllers
         {
             _context = context;
         }
-
+        /// <summary>
+        /// Getting all article tags
+        /// </summary>
         [HttpGet("tags")]
         public async Task<ActionResult<ICollection<ArticleTag>>> GetArticleTags()
         {
@@ -21,7 +27,9 @@ namespace MentalTracker_API.Controllers
             if (tags == null || tags.Count == 0) return NotFound();
             return tags;
         }
-
+        /// <summary>
+        /// Getting all article types
+        /// </summary>
         [HttpGet("types")]
         public async Task<ActionResult<ICollection<ArticleType>>> GetArticleTypes()
         {
@@ -29,7 +37,9 @@ namespace MentalTracker_API.Controllers
             if (types == null || types.Count == 0) return NotFound();
             return types;
         }
-
+        /// <summary>
+        /// Getting all articles
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ICollection<Article>>> GetArticles()
         {
@@ -37,8 +47,16 @@ namespace MentalTracker_API.Controllers
             if (articles == null || articles.Count == 0) return NotFound();
             return articles;
         }
-
-
+        /// <summary>
+        /// Getting a fixed length page of articles
+        /// </summary>
+        /// <param name="pageNumber"> Index of one of pages into which articles were split (already sorted) </param>        
+        /// <param name="pageSize"> Amount of articles in one page </param>        
+        /// <param name="orderBy"> Attribute by which articles are sorted: "author", "posting_date" or "title".
+        /// If null is passed to method, default sorting is used</param>
+        /// <param name="ascending"> If you need to sort in ascending order - true, descending - false </param>
+        /// <returns> Body of response contains a sorted list of articles of length no longer than "pageSize", header contains
+        /// total count of articles in database</returns>
         [HttpGet("page/{pageNumber}")]
         public async Task<ActionResult<ICollection<Article>>> GetArticles(
             [FromRoute] int pageNumber = 1,
@@ -73,14 +91,15 @@ namespace MentalTracker_API.Controllers
                 };
             }
 
-            articles = articles.Skip((pageNumber-1)*pageSize).Take(pageSize).ToList();
+            articles = articles.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
             if (articles == null || articles.Count == 0) return NotFound();
 
             return articles;
         }
-
-
+        /// <summary>
+        /// Getting all articles of same type
+        /// </summary>
         [HttpGet("{articleTypeId}")]
         public async Task<ActionResult<ICollection<Article>>> GetArticlesByType([FromRoute] int articleTypeId)
         {
@@ -91,8 +110,9 @@ namespace MentalTracker_API.Controllers
             if (articles == null || articles.Count == 0) return NotFound();
             return articles;
         }
-
-
+        /// <summary>
+        /// Adding a new article to db
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateNewArticle([FromBody] Article article)
         {
