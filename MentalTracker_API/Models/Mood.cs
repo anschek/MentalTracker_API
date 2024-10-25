@@ -13,13 +13,14 @@ namespace MentalTracker_API.Models
         }
 
         public int Id { get; set; }
+        [JsonIgnore] // In get mood bases
         public int? MoodBaseId { get; set; }
         public string Name { get; set; } = null!;
         [JsonIgnore]
         public virtual MoodBasis? MoodBase { get; set; }
         [JsonIgnore]
         public virtual ICollection<DailyState> DailyStates { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<ArticleTag> Tags { get; set; }
     }
 }

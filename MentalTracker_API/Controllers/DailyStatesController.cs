@@ -17,17 +17,17 @@ namespace MentalTracker_API.Controllers
         /// <summary>
         /// Getting full daily state with mood, note and metrics with assessments
         /// </summary>
-        [HttpGet("{userId}/{date}")]
-        public async Task<ActionResult<DailyState>> GetUserDailyState(Guid userId, DateOnly dateOfState)
+        [HttpGet("{userId}/{dateOfState}")]
+        public async Task<ActionResult<DailyState>> GetUserDailyState([FromRoute] Guid userId, DateOnly dateOfState)
         {
             var user = await _context.Users.FindAsync(userId);
-            if (user == null) return NotFound($"User with id={userId} nor found");
+            if (user == null) return NotFound($"User with id={userId} not found");
 
             var dailyState = await _context.DailyStates.Include(state => state.MetricInDailyStates)
                 .FirstOrDefaultAsync(state => state.User==user && state.NoteDate == dateOfState);
             if (dailyState == null) return NotFound($"State on date: {dateOfState} not found");
 
-            return dailyState;
+            return Ok(dailyState);
         }
         /// <summary>
         ///  Getting full daily states for period.
@@ -37,7 +37,7 @@ namespace MentalTracker_API.Controllers
         ///  if upper limit is null - all states from date Period.Beginning
         /// </summary>
         [HttpGet("{userId}")]
-        public async Task<ActionResult<ICollection<DailyState>>> GetUserDailyStates(Guid userId, [FromHeader] Period? period)
+        public async Task<ActionResult<ICollection<DailyState>>> GetUserDailyStates([FromQuery] Guid userId, [FromHeader] Period? period)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound($"User with id={userId} not found");
@@ -55,13 +55,13 @@ namespace MentalTracker_API.Controllers
 
             if (states == null || states.Count == 0) return NotFound();
 
-            return states;
+            return Ok(states);
         }
         /// <summary>
         /// same as api/DailyStates, but returns short format states
         /// </summary>
         [HttpGet("{userId}/short")]
-        public async Task<ActionResult<ICollection<ShortDailyState>>> GetUserDailyStatesShort(Guid userId, [FromHeader] Period? period)
+        public async Task<ActionResult<ICollection<ShortDailyState>>> GetUserDailyStatesShort([FromQuery] Guid userId, [FromHeader] Period? period)
         {
             var result = await GetUserDailyStates(userId, period);
             if(result.Result != null)
@@ -70,7 +70,7 @@ namespace MentalTracker_API.Controllers
                 return BadRequest(result.Value);
             }
             var shortStates = result.Value.Select(dailyState => new ShortDailyState(dailyState)).ToList();
-            return shortStates;
+            return Ok(shortStates);
         }
         /// <summary>
         /// Saving user's state for day
@@ -116,8 +116,8 @@ namespace MentalTracker_API.Controllers
         /// <summary>
         /// Deleting daily state by its Id
         /// </summary>
-        [HttpDelete("dailyStateId")]
-        public async Task<IActionResult> DeleteUserDailyState(int dailyStateId)
+        [HttpDelete("{dailyStateId}")]
+        public async Task<IActionResult> DeleteUserDailyState([FromRoute] int dailyStateId)
         {
             var dailyState = await _context.DailyStates.FindAsync(dailyStateId);
             if (dailyState == null) return NotFound($"State with id={dailyStateId} not found");

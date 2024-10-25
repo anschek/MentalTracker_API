@@ -21,7 +21,7 @@ namespace MentalTracker_API.Controllers
         {
             var metricTypes = await _context.MetricTypes.Include(metricType => metricType.Metrics).ToListAsync();
             if(metricTypes == null || metricTypes.Count == 0) return NotFound();
-            return metricTypes;
+            return Ok(metricTypes);
         }
         /// <summary>
         /// Creating a new metric
@@ -33,10 +33,12 @@ namespace MentalTracker_API.Controllers
         public async Task<IActionResult> CreateNewMetric([FromQuery] int metricTypeId, [FromQuery] string newMetricName, [FromQuery] bool newMetricIsPositive)
         {
             var mentalType = await _context.MetricTypes.FindAsync(metricTypeId);
-            if (mentalType == null) return NotFound($"Metric type with id = {metricTypeId} not found");
+            if (mentalType == null) return NotFound($"Metric type with id={metricTypeId} not found");
+
             var newMetric = new Metric { Id=0, Name = newMetricName, MetricTypeId = metricTypeId, IsPositive = newMetricIsPositive };
             await _context.Metrics.AddAsync(newMetric);
             await _context.SaveChangesAsync();
+
             return Ok();
         }
     }

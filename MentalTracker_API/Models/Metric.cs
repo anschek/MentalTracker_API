@@ -21,6 +21,7 @@ namespace MentalTracker_API.Models
         public virtual MetricType? MetricType { get; set; }
         [JsonIgnore]
         public virtual ICollection<MetricInDailyState> MetricInDailyStates { get; set; }
+        [JsonIgnore]
         public virtual ICollection<TagMetricMatch> TagMetricMatches { get; set; }
     }
 }

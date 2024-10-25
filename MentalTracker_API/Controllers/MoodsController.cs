@@ -21,7 +21,7 @@ namespace MentalTracker_API.Controllers
         {
             var moodBases = await _context.MoodBases.Include(moodBase => moodBase.Moods).ToListAsync();
             if (moodBases == null || moodBases.Count == 0) return NotFound();
-            return moodBases;
+            return Ok(moodBases);
         }
         /// <summary>
         /// Creating a new moods
@@ -32,11 +32,13 @@ namespace MentalTracker_API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateNewMood([FromQuery] int moodBaseId, [FromQuery] string newMoodName)
         {
-            var moodBase = await _context.MoodBases.FirstOrDefaultAsync(moodBase => moodBase.Id == moodBaseId);
-            if (moodBase == null) return NotFound($"Mood base with id = {moodBaseId} not found");
+            var moodBase = await _context.MoodBases.FindAsync(moodBaseId);
+            if (moodBase == null) return NotFound($"Mood base with id={moodBaseId} not found");
+
             var newMood = new Mood { Id = 0, Name = newMoodName, MoodBaseId = moodBaseId };
             await _context.Moods.AddAsync(newMood);
             await _context.SaveChangesAsync();
+
             return Ok();
         }
     }

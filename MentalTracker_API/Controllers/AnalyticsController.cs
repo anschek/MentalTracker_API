@@ -166,7 +166,7 @@ namespace MentalTracker_API.Controllers
                 }
             }
 
-            return recommendedArticles.OrderByDescending(article => article.Value).ToDictionary(article => article.Key, article => article.Value);
+            return Ok(recommendedArticles.OrderByDescending(article => article.Value).ToDictionary(article => article.Key, article => article.Value));
         }
 
     }

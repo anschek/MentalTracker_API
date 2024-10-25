@@ -25,7 +25,7 @@ namespace MentalTracker_API.Controllers
         {
             var tags = await _context.ArticleTags.ToListAsync();
             if (tags == null || tags.Count == 0) return NotFound();
-            return tags;
+            return Ok(tags);
         }
         /// <summary>
         /// Getting all article types
@@ -35,7 +35,7 @@ namespace MentalTracker_API.Controllers
         {
             var types = await _context.ArticleTypes.ToListAsync();
             if (types == null || types.Count == 0) return NotFound();
-            return types;
+            return Ok(types);
         }
         /// <summary>
         /// Getting all articles
@@ -45,7 +45,7 @@ namespace MentalTracker_API.Controllers
         {
             var articles = await _context.Articles.Include(article => article.Type).Include(article => article.Tags).ToListAsync();
             if (articles == null || articles.Count == 0) return NotFound();
-            return articles;
+            return Ok(articles);
         }
         /// <summary>
         /// Getting a fixed length page of articles
@@ -95,7 +95,7 @@ namespace MentalTracker_API.Controllers
 
             if (articles == null || articles.Count == 0) return NotFound();
 
-            return articles;
+            return Ok(articles);
         }
         /// <summary>
         /// Getting all articles of same type
@@ -105,10 +105,12 @@ namespace MentalTracker_API.Controllers
         {
             var articleType = await _context.ArticleTypes.FirstOrDefaultAsync(type => type.Id == articleTypeId);
             if (articleType == null) return NotFound($"Article type with id={articleTypeId} not found");
+
             var articles = await _context.Articles.Include(article => article.Type).Include(article => article.Tags)
                 .Where(articles => articles.Type == articleType).ToListAsync();
             if (articles == null || articles.Count == 0) return NotFound();
-            return articles;
+
+            return Ok(articles);
         }
         /// <summary>
         /// Adding a new article to db

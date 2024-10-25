@@ -10,7 +10,7 @@ namespace MentalTracker_API.Models
         {
             MetricInDailyStates = new HashSet<MetricInDailyState>();
         }
-
+        [JsonIgnore]
         public int Id { get; set; }
         public Guid UserId { get; set; }
         public DateOnly NoteDate { get; set; }
@@ -18,7 +18,7 @@ namespace MentalTracker_API.Models
         public int MoodId { get; set; }
         public string? Note { get; set; }
 
-        [JsonIgnore]
+        
         public virtual Mood Mood { get; set; } = null!;
         [JsonIgnore]
         public virtual User User { get; set; } = null!;

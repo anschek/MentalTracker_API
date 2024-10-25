@@ -23,7 +23,7 @@ namespace MentalTracker_API.Controllers
         [HttpPost("request-code")]
         public async Task<IActionResult> RequestVerificationCode([FromQuery] string recipientEmail)
         {
-            if (string.IsNullOrWhiteSpace(recipientEmail)) return BadRequest("Email is required.");
+            if (string.IsNullOrWhiteSpace(recipientEmail)) return BadRequest("Email is required");
 
             var code = _random.Next(100000, 999999).ToString();
             var expiryTime = DateTime.UtcNow.AddSeconds(60);
