@@ -12,6 +12,8 @@ namespace MentalTracker_API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // Add email service
+            builder.Services.AddSingleton<EmailService>();
             // Add controllers
             builder.Services.AddControllers(options =>
             {
@@ -49,9 +51,6 @@ namespace MentalTracker_API
             app.UseAuthorization();
             app.MapControllers();
             app.Run();
-
-            //TODO add mail service
-            //TODO add authorization token instead of return User class
         }
     }
 }
