@@ -1,41 +1,37 @@
+﻿using MentalTracker_API.Helpers;
+using MentalTracker_API.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
+using System.Text.Json;
 using MentalTracker_API;
-using System.Diagnostics;
 
 namespace MentalTracker_API_Test
 {
-    [TestClass]
     public class ApiTests
     {
-        private static HttpClient _client;
-        private static WebApplicationFactory<Program> _factory;
+        protected static WebApplicationFactory<Program> _factory;
+        protected static HttpClient _client;
+        protected static MentalTrackerContext _context;
+        protected static string _baseUrl = "https://localhost:7254/api/";
+        protected static JsonSerializerOptions _customJsonOptions;
 
-        [ClassInitialize]
-        public static void Initialixe(TestContext context)
+        public ApiTests()
         {
             _factory = new WebApplicationFactory<Program>();
             _client = _factory.CreateClient();
-        }
-
-        [TestMethod]
-        public async Task CreateNewUser_PassExistingMailWithCorrectPassword_ReturnsExistingUser()
-        {
-            string url = "https://localhost:7254/api/Users/";
-            string queryParams = "?mail=anschek@yandex.ru&password=admin";
-            url += queryParams;
-
-            HttpResponseMessage response = await _client.GetAsync(url);
-            Assert.IsTrue(response.IsSuccessStatusCode);
-            string content = await response.Content.ReadAsStringAsync();
-            Assert.IsNotNull(content);
-            Debug.WriteLine(content);
+            _context = new MentalTrackerContext();
+            _customJsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new DateOnlyConverter() }
+            };
         }
 
         [ClassCleanup]
-        public static void Cleanup()
+        public void Cleanup()
         {
             _client.Dispose();
             _factory.Dispose();
+            _context.Dispose();
         }
     }
 }
