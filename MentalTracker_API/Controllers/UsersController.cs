@@ -28,7 +28,7 @@ namespace MentalTracker_API.Controllers
         /// Getting user object by mail and password
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<User>> GetUser([FromQuery]string mail, [FromQuery]string password)
+        public async Task<ActionResult<User>> GetUser([FromHeader]string mail, [FromHeader]string password)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(user => user.Mail == mail
@@ -43,22 +43,22 @@ namespace MentalTracker_API.Controllers
         /// <param name="user">Includes: mail, password, date of birth, name </param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<User>> CreateNewUser([FromQuery] User user)
+        public async Task<ActionResult<User>> CreateNewUser([FromBody] User user)
         {
             var existingUser = await _context.Users.FirstOrDefaultAsync(existing => existing.Mail == user.Mail);
-            if (existingUser != user) return BadRequest($"User with mail: {user.Mail} already exist");
+            if (existingUser != null) return BadRequest($"User with mail: {user.Mail} already exist");
 
             user.Password = GetPasswordHash(user.Password);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok(await _context.Users.FirstAsync(user => user.Mail == user.Mail));
+            return Ok(await _context.Users.FirstAsync(existing => existing.Mail == user.Mail));
         }
         /// <summary>
         /// User data update
         /// </summary>
         [HttpPut("change-personal-data")]
-        public async Task<IActionResult> UpdateUserData([FromQuery] User updatedUser)
+        public async Task<IActionResult> UpdateUserData([FromBody] User updatedUser)
         {
             var existingUser = await _context.Users.FindAsync(updatedUser.Id);
             if (existingUser == null) return NotFound("User not found");
@@ -67,7 +67,6 @@ namespace MentalTracker_API.Controllers
             existingUser.Mail = updatedUser.Mail;
             existingUser.DateOfBirth = updatedUser.DateOfBirth;
 
-            _context.Entry(updatedUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return Ok();
         }
@@ -75,7 +74,7 @@ namespace MentalTracker_API.Controllers
         /// User password update
         /// </summary>
         [HttpPut("change-password")]
-        public async Task<IActionResult> UpdateUserPassword([FromQuery] Guid updatedUserId, [FromQuery] string oldPassword,[FromQuery] string newPassword)
+        public async Task<IActionResult> UpdateUserPassword([FromHeader] Guid updatedUserId, [FromHeader] string oldPassword,[FromBody] string newPassword)
         {
             var existingUser = await _context.Users.FindAsync(updatedUserId);
             if (existingUser == null) return NotFound("User not found");
@@ -83,7 +82,6 @@ namespace MentalTracker_API.Controllers
             if (existingUser.Password != GetPasswordHash(oldPassword)) return BadRequest("Wrong old password");
 
             existingUser.Password = GetPasswordHash(newPassword);
-            _context.Entry(existingUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return Ok();
         }
