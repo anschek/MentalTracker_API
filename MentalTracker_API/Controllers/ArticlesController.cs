@@ -74,21 +74,21 @@ namespace MentalTracker_API.Controllers
 
             if (!string.IsNullOrEmpty(orderBy))
             {
-                if (ascending) _ = orderBy.ToLower() switch
+                IOrderedEnumerable<Article> sortedArticles = 
+                ascending? orderBy.ToLower() switch
                 {
                     "author" => articles.OrderBy(article => article.Author),
                     "posting_date" => articles.OrderBy(article => article.PostingDate),
                     "title" => articles.OrderBy(article => article.Title),
                     _ => articles.OrderBy(article => article.Id) // default
-                };
-
-                else _ = orderBy.ToLower() switch
+                }:orderBy.ToLower() switch
                 {
                     "author" => articles.OrderByDescending(article => article.Author),
                     "posting_date" => articles.OrderByDescending(article => article.PostingDate),
                     "title" => articles.OrderByDescending(article => article.Title),
                     _ => articles.OrderByDescending(article => article.Id) // default
                 };
+                articles = sortedArticles.ToList();
             }
 
             articles = articles.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
@@ -103,11 +103,11 @@ namespace MentalTracker_API.Controllers
         [HttpGet("{articleTypeId}")]
         public async Task<ActionResult<ICollection<Article>>> GetArticlesByType([FromRoute] int articleTypeId)
         {
-            var articleType = await _context.ArticleTypes.FirstOrDefaultAsync(type => type.Id == articleTypeId);
+            var articleType = await _context.ArticleTypes.FindAsync(articleTypeId);
             if (articleType == null) return NotFound($"Article type with id={articleTypeId} not found");
 
             var articles = await _context.Articles.Include(article => article.Type).Include(article => article.Tags)
-                .Where(articles => articles.Type == articleType).ToListAsync();
+                .Where(articles => articles.TypeId == articleType.Id).ToListAsync();
             if (articles == null || articles.Count == 0) return NotFound();
 
             return Ok(articles);
@@ -120,7 +120,7 @@ namespace MentalTracker_API.Controllers
         {
             article.Id = 0;
 
-            var type = await _context.ArticleTypes.FirstOrDefaultAsync(type => type.Id == article.TypeId);
+            var type = await _context.ArticleTypes.FindAsync(article.TypeId);
             if (type == null) return NotFound($"Article type with Id={article.TypeId} not found");
             article.Type = type;
 
