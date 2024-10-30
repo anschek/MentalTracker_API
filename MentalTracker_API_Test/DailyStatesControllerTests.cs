@@ -49,7 +49,7 @@ namespace MentalTracker_API_Test
                 Assert.Fail();
             }
 
-            return await _context.DailyStates.FirstAsync(state => state.UserId == userId && state.NoteDate == noteDate);
+            return await _context.DailyStates.Include(state => state.MetricInDailyStates).FirstAsync(state => state.UserId == userId && state.NoteDate == noteDate);
         }
 
         public async Task<DailyStateDto> GetUserDailyState_PassCorrectUserAndDate_ReturnsExistingState(Guid userId, DateOnly noteDate)

@@ -8,9 +8,7 @@ namespace MentalTracker_API_Test
     [TestClass]
     public class UsersControllerTests: ApiTests
     {
-        private static string _url = _baseUrl + "Users/";
-
-        public UsersControllerTests() : base() { }
+        public UsersControllerTests() : base() { _baseUrl += "Users/";  }
 
         public async Task<User> CreateNewUser_PassCorrectData_ReturnsNewUser(User user)
         {
@@ -19,7 +17,7 @@ namespace MentalTracker_API_Test
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
            
             // Act
-            HttpResponseMessage response = await _client.PostAsync(_url, content);
+            HttpResponseMessage response = await _client.PostAsync(_baseUrl, content);
             string stringContent = await response.Content.ReadAsStringAsync();
 
             // Assert
@@ -46,7 +44,7 @@ namespace MentalTracker_API_Test
             _client.DefaultRequestHeaders.Add("password", password);
 
             // Act
-            HttpResponseMessage response = await _client.GetAsync(_url);
+            HttpResponseMessage response = await _client.GetAsync(_baseUrl);
             string stringContent = await response.Content.ReadAsStringAsync();
 
             // Assert
@@ -71,7 +69,7 @@ namespace MentalTracker_API_Test
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
             // Act
-            HttpResponseMessage response = await _client.PutAsync(_url + "change-personal-data", content);
+            HttpResponseMessage response = await _client.PutAsync(_baseUrl + "change-personal-data", content);
             string stringContent = await response.Content.ReadAsStringAsync();
 
             // Assert
@@ -92,7 +90,7 @@ namespace MentalTracker_API_Test
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
             // Act
-            HttpResponseMessage response = await _client.PutAsync(_url + "change-password", content);
+            HttpResponseMessage response = await _client.PutAsync(_baseUrl + "change-password", content);
             string stringContent = await response.Content.ReadAsStringAsync();
 
             // Assert

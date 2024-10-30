@@ -11,7 +11,7 @@ namespace MentalTracker_API_Test
         protected static WebApplicationFactory<Program> _factory;
         protected static HttpClient _client;
         protected static MentalTrackerContext _context;
-        protected static string _baseUrl = "https://localhost:7254/api/";
+        protected string _baseUrl = "https://localhost:7254/api/";
         protected static JsonSerializerOptions _customJsonOptions;
 
         public ApiTests()
