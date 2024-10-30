@@ -33,7 +33,7 @@ namespace MentalTracker_API.Models
             if (!optionsBuilder.IsConfigured)
             {
                 //global
-                #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseNpgsql("Host=ngknn.ru;Port=5442;Database=mental_tracker;Username=31P;Password=12345");
                 //local
                 //optionsBuilder.UseNpgsql("Host=edu.pg.ngknn.local;Port=5432;Database=mental_tracker;Username=31P;Password=12345");
@@ -162,7 +162,6 @@ namespace MentalTracker_API.Models
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.DailyStates)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("daily_states_user_id_fkey");
             });
 
@@ -202,7 +201,6 @@ namespace MentalTracker_API.Models
                 entity.HasOne(d => d.DailyState)
                     .WithMany(p => p.MetricInDailyStates)
                     .HasForeignKey(d => d.DailyStateId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("metric_in_daily_states_daily_state_id_fkey");
 
                 entity.HasOne(d => d.Metric)
