@@ -15,7 +15,7 @@ namespace MentalTracker_API.Controllers
         {
             _context = context;
         }
-        private string GetPasswordHash(string password)
+        internal static string GetPasswordHash(string password)
         {
             using (SHA512 sha512 = SHA512.Create())
             {

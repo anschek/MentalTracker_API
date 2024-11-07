@@ -1,5 +1,11 @@
 ﻿namespace MentalTracker_API.Models.DTOs
 {
+    public class MetricQuality
+    {
+        public string MetricTypeName { get; set; }
+        public double Assessment { get; set; }
+    }
+
     public class ShortDailyState
     {
         public ShortDailyState(DailyState fullDailyState)
@@ -10,16 +16,18 @@
             Mood = fullDailyState.Mood;
             Note = fullDailyState.Note;
 
-            MetricsQuality = new Dictionary<string, double>();
+            MetricsQuality = new List<MetricQuality>();
             MetricsQuality = fullDailyState.MetricInDailyStates.GroupBy(dailyMetric => dailyMetric.Metric.MetricType)
-                .ToDictionary(
-                group => group.Key.Name,
-                group => group.Sum(dailyMetric => dailyMetric.Metric.IsPositive
+                .Select( group =>
+                new MetricQuality
+                {
+                    MetricTypeName =  group.Key.Name,
+                    Assessment = group.Sum(dailyMetric => dailyMetric.Metric.IsPositive
                 ? dailyMetric.Assessment
                 : 6 - dailyMetric.Assessment)
                 /5.0 
                 / group.Count()
-                );
+                }).ToList();
         }
 
         public ShortDailyState() { }
@@ -28,6 +36,6 @@
         public int GeneralMoodAssessment { get; set; }
         public virtual Mood Mood { get; set; } = null!;
         public string? Note {  get; set; }
-        public Dictionary<string, double>? MetricsQuality { get; set; } = null;
+        public List<MetricQuality>? MetricsQuality { get; set; } = null;
     }
 }
